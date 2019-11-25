@@ -52,7 +52,10 @@ flutter:
   assets:
     - assets/end.mp3
     - assets/start.mp3
-    - assets/images/setup_background.jpg
+    - assets/whistle.mp3
+    - assets/images/setup.png
+    - assets/images/box.png
+    - assets/images/rest.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

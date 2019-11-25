@@ -7,6 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:screen/screen.dart';
 
 void main() => runApp(MyApp());
+const backGroundColor = 0xff263238;
+const textColor = Colors.white;
+const setupIcon = "assets/images/setup.png";
+const boxIcon = "assets/images/box.png";
+const restIcon = "assets/images/rest.png";
+const marginTopTimers = 40.0;
+IconData icon = Icons.pause;
 
 class MyApp extends StatelessWidget {
   @override
@@ -21,7 +28,22 @@ class MyApp extends StatelessWidget {
       title: 'Boxe training',
       theme: ThemeData(
         primaryColor: Colors.red,
-        accentColor: Colors.red),
+        accentColor: Colors.red,
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: textColor),
+          ),
+        ),
+        backgroundColor: Color(backGroundColor),
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        textTheme: TextTheme(
+          title: TextStyle(color: textColor),
+          body1: TextStyle(color: textColor),
+          overline: TextStyle(color: textColor),
+        ),
+      ),
       home: SetupTimerPage(),
     );
   }
@@ -31,12 +53,14 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
   static AudioCache player = new AudioCache();
   var startBell = "start.mp3";
   var endBell = "end.mp3";
+  var whistle = "whistle.mp3";
   var sub;
   int stepInSeconds = 1;
   String status = "Prepare-se!";
   Data data;
   String currentNumber = "0";
   var round = 0;
+  var iconStatus = setupIcon;
 
   CountdownTimerPageState({this.data}) {
     startDelay();
@@ -48,6 +72,7 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
   }
 
   void startDelay() {
+    iconStatus = setupIcon;
     round = 0;
     CountDown countDownTimer = CountDown(Duration(seconds: data.delay));
     sub = countDownTimer.stream.listen(null);
@@ -63,12 +88,22 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
     });
   }
 
+  onPressPause(IconData iconData) {
+    if (sub.isPaused) {
+      sub.resume();
+    } else {
+      sub.pause();
+    }
+  }
+
   void startRest() {
+    iconStatus = restIcon;
     status = "Descanse";
     CountDown countDownTimer = CountDown(Duration(seconds: data.rest));
     sub = countDownTimer.stream.listen(null);
 
     sub.onData((Duration duration) {
+      checkRest(duration.inSeconds);
       currentNumber = duration.toString().substring(2, 7);
       this.onTimerTick(currentNumber, status);
     });
@@ -81,6 +116,7 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
 
   startRound() {
     player.play(startBell);
+    iconStatus = boxIcon;
     round += 1;
     status = "Lute!";
     CountDown countDownTimer = CountDown(Duration(seconds: data.duration));
@@ -88,11 +124,12 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
 
     sub.onData((Duration duration) {
       currentNumber = duration.toString().substring(2, 7);
+      checkRound(duration.inSeconds);
       this.onTimerTick(currentNumber, status);
     });
 
     sub.onDone(() {
-      if (round > 1 && round < data.rounds) {
+      if (round > 0 && round < data.rounds) {
         player.play(startBell);
         startRest();
       } else {
@@ -102,6 +139,18 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
         player.play(endBell);
       }
     });
+  }
+
+  checkRest(int time) {
+    if (time == data.restWarning) {
+      player.play(whistle);
+    }
+  }
+
+  checkRound(int time) {
+    if (time == data.roundWarning) {
+      player.play(whistle);
+    }
   }
 
   void onTimerTick(String currentNumber, String status) {
@@ -120,47 +169,92 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
           title: Text('Round Timer'),
         ),
         body: Container(
+          height: double.infinity,
           decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/setup_background.jpg"),
-              fit: BoxFit.cover,
-            ),
+            color: Color(backGroundColor),
           ),
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 40),
-                  child: Text(
-                    "Round: " + (round).toString(),
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.bold),
+          child: LayoutBuilder(
+            builder:
+                (BuildContext context, BoxConstraints viewportConstraints) {
+              return SingleChildScrollView(
+                child: Center(
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: 30),
+                        child: Text(
+                          "Round: " + (round).toString(),
+                          style: TextStyle(
+                              fontSize: 25.0, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 30),
+                        child: Text(
+                          "Tempo: $currentNumber",
+                          style: TextStyle(
+                              fontSize: 50.0, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 30),
+                        child: Text(
+                          status,
+                          style: TextStyle(
+                              fontSize: 40.0, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 40),
+                        child: Image.asset(
+                          iconStatus,
+                          width: 100,
+                          height: 100,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 50),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(right: 40),
+                              child: FloatingActionButton(
+                                heroTag: null,
+                                onPressed: () {
+                                  setState(() {
+                                    icon = icon == Icons.play_arrow
+                                        ? Icons.pause
+                                        : Icons.play_arrow;
+
+                                    onPressPause(icon);
+                                  });
+                                },
+                                child: Icon(icon),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 40),
+                              child: FloatingActionButton(
+                                heroTag: null,
+                                onPressed: () {
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    SystemNavigator.pop();
+                                  }
+                                },
+                                child: Icon(Icons.refresh),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: 40),
-                  child: Text(
-                    "Tempo: $currentNumber",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 50.0,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 40),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 40.0,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
@@ -176,13 +270,17 @@ class SetupTimerPageState extends State<SetupTimerPage> {
   final delayMinController = TextEditingController();
   final delaySecController = TextEditingController();
   final roundController = TextEditingController();
+  final roundWarningController = TextEditingController();
+  final restWarningController = TextEditingController();
   String min = "3";
   String sec = "00";
   String restMin = "1";
   String restSec = "00";
   String delayMin = "0";
-  String delaySec = "30";
+  String delaySec = "10";
   int rounds = 6;
+  int restWarning = 10;
+  int roundWarning = 30;
   var data = Data();
 
   int calcRound() {
@@ -239,6 +337,26 @@ class SetupTimerPageState extends State<SetupTimerPage> {
     roundController.text = rounds.toString();
   }
 
+  incRoundWarning() {
+    roundWarning = roundWarning + 1;
+    roundWarningController.text = roundWarning.toString();
+  }
+
+  decRoundWarning() {
+    if (roundWarning > 0) roundWarning = roundWarning - 1;
+    roundWarningController.text = roundWarning.toString();
+  }
+
+  incRestWarning() {
+    restWarning = restWarning + 1;
+    restWarningController.text = restWarning.toString();
+  }
+
+  decRestWarning() {
+    if (restWarning > 0) restWarning = restWarning - 1;
+    restWarningController.text = restWarning.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     minController.text = min.toString();
@@ -248,267 +366,393 @@ class SetupTimerPageState extends State<SetupTimerPage> {
     delayMinController.text = delayMin.toString();
     delaySecController.text = delaySec.toString();
     roundController.text = rounds.toString();
+    roundWarningController.text = roundWarning.toString();
+    restWarningController.text = restWarning.toString();
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Round Timer'),
       ),
       body: Container(
+        height: double.infinity,
         decoration: BoxDecoration(
-          color: Color.fromARGB(55, 71, 79, 1),
+          color: Color(backGroundColor),
         ),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: Center(
-                child: Text("Quantidade de rounds"),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(right: 35),
-                      child: IconButton(
-                          icon: Icon(Icons.indeterminate_check_box),
-                          onPressed: () {
-                            decRounds();
-                          })),
-                ),
-                Flexible(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      controller: roundController,
-                      decoration: InputDecoration(counter: SizedBox.shrink()),
-                      keyboardType: TextInputType.number,
-                      maxLength: 2,
-                      inputFormatters: [
-                        WhitelistingTextInputFormatter.digitsOnly
-                      ],
-                      onChanged: (text) {
-                        rounds = int.parse(text);
-                      },
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints viewportConstraints) {
+            return SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: marginTopTimers),
+                    child: Center(
+                      child: Text("Quantidade de rounds"),
                     ),
                   ),
-                ),
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(left: 35),
-                      child: IconButton(
-                          icon: Icon(Icons.add_box),
-                          onPressed: () {
-                            incRounds();
-                          })),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: Center(
-                child: Text("Duração do round"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(right: 35),
+                            child: IconButton(
+                                icon: Icon(Icons.indeterminate_check_box),
+                                onPressed: () {
+                                  decRounds();
+                                })),
+                      ),
+                      Flexible(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            controller: roundController,
+                            decoration: InputDecoration(
+                              counter: SizedBox.shrink(),
+                            ),
+                            style: TextStyle(color: textColor),
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            inputFormatters: [
+                              WhitelistingTextInputFormatter.digitsOnly
+                            ],
+                            onChanged: (text) {
+                              rounds = int.parse(text);
+                            },
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: IconButton(
+                                icon: Icon(Icons.add_box),
+                                onPressed: () {
+                                  incRounds();
+                                })),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: marginTopTimers),
+                    child: Center(
+                      child: Text("Duração do round (mm:ss)"),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: IconButton(
+                                icon: Icon(Icons.indeterminate_check_box),
+                                onPressed: () {
+                                  decDuration();
+                                })),
+                      ),
+                      Flexible(
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: minController,
+                          decoration:
+                              InputDecoration(counter: SizedBox.shrink()),
+                          style: TextStyle(color: textColor),
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          inputFormatters: [
+                            WhitelistingTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (text) {
+                            min = text;
+                          },
+                        ),
+                      ),
+                      Flexible(
+                          child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(":"),
+                      )),
+                      Flexible(
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: secController,
+                          decoration:
+                              InputDecoration(counter: SizedBox.shrink()),
+                          style: TextStyle(color: textColor),
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          inputFormatters: [
+                            WhitelistingTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (text) {
+                            sec = text;
+                          },
+                        ),
+                      ),
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: IconButton(
+                                icon: Icon(Icons.add_box),
+                                onPressed: () {
+                                  incDuration();
+                                })),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: marginTopTimers),
+                    child: Center(
+                      child: Text("Descanso (mm:ss)"),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: IconButton(
+                                icon: Icon(Icons.indeterminate_check_box),
+                                onPressed: () {
+                                  decRest();
+                                })),
+                      ),
+                      Flexible(
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: restMinController,
+                          decoration:
+                              InputDecoration(counter: SizedBox.shrink()),
+                          style: TextStyle(color: textColor),
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          inputFormatters: [
+                            WhitelistingTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (text) {
+                            restMin = text;
+                          },
+                        ),
+                      ),
+                      Flexible(
+                          child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        child: Text(":"),
+                      )),
+                      Flexible(
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: restSecController,
+                          decoration:
+                              InputDecoration(counter: SizedBox.shrink()),
+                          style: TextStyle(color: textColor),
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          inputFormatters: [
+                            WhitelistingTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (text) {
+                            restSec = text;
+                          },
+                        ),
+                      ),
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: IconButton(
+                                icon: Icon(Icons.add_box),
+                                onPressed: () {
+                                  incRest();
+                                })),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: marginTopTimers),
+                    child: Center(
+                      child: Text("Preparação (mm:ss)"),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: IconButton(
+                                icon: Icon(Icons.indeterminate_check_box),
+                                onPressed: () {
+                                  decDelay();
+                                })),
+                      ),
+                      Flexible(
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: delayMinController,
+                          decoration:
+                              InputDecoration(counter: SizedBox.shrink()),
+                          style: TextStyle(color: textColor),
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          inputFormatters: [
+                            WhitelistingTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (text) {
+                            delayMin = text;
+                          },
+                        ),
+                      ),
+                      Flexible(
+                          child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        child: Text(":"),
+                      )),
+                      Flexible(
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: delaySecController,
+                          decoration:
+                              InputDecoration(counter: SizedBox.shrink()),
+                          style: TextStyle(color: textColor),
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          inputFormatters: [
+                            WhitelistingTextInputFormatter.digitsOnly
+                          ],
+                          onChanged: (text) {
+                            delaySec = text;
+                          },
+                        ),
+                      ),
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: IconButton(
+                                icon: Icon(Icons.add_box),
+                                onPressed: () {
+                                  incDelay();
+                                })),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: marginTopTimers),
+                    child: Center(
+                      child: Text("Aviso final de round (ss)"),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(right: 35),
+                            child: IconButton(
+                                icon: Icon(Icons.indeterminate_check_box),
+                                onPressed: () {
+                                  decRoundWarning();
+                                })),
+                      ),
+                      Flexible(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            controller: roundWarningController,
+                            decoration: InputDecoration(
+                              counter: SizedBox.shrink(),
+                            ),
+                            style: TextStyle(color: textColor),
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            inputFormatters: [
+                              WhitelistingTextInputFormatter.digitsOnly
+                            ],
+                            onChanged: (text) {
+                              restWarning = int.parse(text);
+                            },
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: IconButton(
+                                icon: Icon(Icons.add_box),
+                                onPressed: () {
+                                  incRoundWarning();
+                                })),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: marginTopTimers),
+                    child: Center(
+                      child: Text("Aviso final de descanso (ss)"),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(right: 35),
+                            child: IconButton(
+                                icon: Icon(Icons.indeterminate_check_box),
+                                onPressed: () {
+                                  decRestWarning();
+                                })),
+                      ),
+                      Flexible(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            controller: restWarningController,
+                            decoration: InputDecoration(
+                              counter: SizedBox.shrink(),
+                            ),
+                            style: TextStyle(color: textColor),
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            inputFormatters: [
+                              WhitelistingTextInputFormatter.digitsOnly
+                            ],
+                            onChanged: (text) {
+                              restWarning = int.parse(text);
+                            },
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: IconButton(
+                                icon: Icon(Icons.add_box),
+                                onPressed: () {
+                                  incRestWarning();
+                                })),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        startCountDown(context);
+                      },
+                      icon: Icon(Icons.play_arrow),
+                      label: Text("Começar"),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(right: 10),
-                      child: IconButton(
-                          icon: Icon(Icons.indeterminate_check_box),
-                          onPressed: () {
-                            decDuration();
-                          })),
-                ),
-                Flexible(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: minController,
-                    decoration: InputDecoration(counter: SizedBox.shrink()),
-                    keyboardType: TextInputType.number,
-                    maxLength: 2,
-                    inputFormatters: [
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (text) {
-                      min = text;
-                    },
-                  ),
-                ),
-                Flexible(
-                    child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(":"),
-                )),
-                Flexible(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: secController,
-                    decoration: InputDecoration(counter: SizedBox.shrink()),
-                    keyboardType: TextInputType.number,
-                    maxLength: 2,
-                    inputFormatters: [
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (text) {
-                      sec = text;
-                    },
-                  ),
-                ),
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: IconButton(
-                          icon: Icon(Icons.add_box),
-                          onPressed: () {
-                            incDuration();
-                          })),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: Center(
-                child: Text("Descanço"),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(right: 10),
-                      child: IconButton(
-                          icon: Icon(Icons.indeterminate_check_box),
-                          onPressed: () {
-                            decRest();
-                          })),
-                ),
-                Flexible(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: restMinController,
-                    decoration: InputDecoration(counter: SizedBox.shrink()),
-                    keyboardType: TextInputType.number,
-                    maxLength: 2,
-                    inputFormatters: [
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (text) {
-                      restMin = text;
-                    },
-                  ),
-                ),
-                Flexible(
-                    child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                  child: Text(":"),
-                )),
-                Flexible(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: restSecController,
-                    decoration: InputDecoration(counter: SizedBox.shrink()),
-                    keyboardType: TextInputType.number,
-                    maxLength: 2,
-                    inputFormatters: [
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (text) {
-                      restSec = text;
-                    },
-                  ),
-                ),
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: IconButton(
-                          icon: Icon(Icons.add_box),
-                          onPressed: () {
-                            incRest();
-                          })),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: Center(
-                child: Text("Preparação"),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(right: 10),
-                      child: IconButton(
-                          icon: Icon(Icons.indeterminate_check_box),
-                          onPressed: () {
-                            decDelay();
-                          })),
-                ),
-                Flexible(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: delayMinController,
-                    decoration: InputDecoration(counter: SizedBox.shrink()),
-                    keyboardType: TextInputType.number,
-                    maxLength: 2,
-                    inputFormatters: [
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (text) {
-                      delayMin = text;
-                    },
-                  ),
-                ),
-                Flexible(
-                    child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                  child: Text(":"),
-                )),
-                Flexible(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: delaySecController,
-                    decoration: InputDecoration(counter: SizedBox.shrink()),
-                    keyboardType: TextInputType.number,
-                    maxLength: 2,
-                    inputFormatters: [
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (text) {
-                      delaySec = text;
-                    },
-                  ),
-                ),
-                Flexible(
-                  child: Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: IconButton(
-                          icon: Icon(Icons.add_box),
-                          onPressed: () {
-                            incDelay();
-                          })),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: FloatingActionButton.extended(
-                onPressed: () {
-                  startCountDown(context);
-                },
-                icon: Icon(Icons.play_arrow),
-                label: Text("Começar"),
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -519,7 +763,9 @@ class SetupTimerPageState extends State<SetupTimerPage> {
         duration: calcRound(),
         rest: calcRest(),
         rounds: rounds,
-        delay: calcDelay());
+        delay: calcDelay(),
+        restWarning: restWarning,
+        roundWarning: roundWarning);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -550,6 +796,14 @@ class Data {
   int duration;
   int rest;
   int delay;
+  int roundWarning;
+  int restWarning;
 
-  Data({this.rounds, this.duration, this.rest, this.delay});
+  Data(
+      {this.rounds,
+      this.duration,
+      this.rest,
+      this.delay,
+      this.roundWarning,
+      this.restWarning});
 }
