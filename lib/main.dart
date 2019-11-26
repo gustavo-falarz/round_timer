@@ -12,6 +12,7 @@ const textColor = Colors.white;
 const setupIcon = "assets/images/setup.png";
 const boxIcon = "assets/images/box.png";
 const restIcon = "assets/images/rest.png";
+const endIcon = "assets/images/end.png";
 const marginTopTimers = 40.0;
 IconData icon = Icons.pause;
 
@@ -54,103 +55,138 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
   var startBell = "start.mp3";
   var endBell = "end.mp3";
   var whistle = "whistle.mp3";
-  var sub;
+  var subscriber;
+
   int stepInSeconds = 1;
   String status = "Prepare-se!";
   Data data;
   String currentNumber = "0";
   var round = 0;
   var iconStatus = setupIcon;
+  var duplicate = 1654;
 
   CountdownTimerPageState({this.data}) {
     startDelay();
   }
 
   Future<bool> _onWillPop() {
-    sub.cancel();
+    subscriber.cancel();
     return new Future.value(true);
   }
 
   void startDelay() {
     iconStatus = setupIcon;
     round = 0;
-    CountDown countDownTimer = CountDown(Duration(seconds: data.delay));
-    sub = countDownTimer.stream.listen(null);
+    CountDown countDownTimer =
+        CountDown(Duration(seconds: data.delay), everyTick: 1);
+    subscriber = countDownTimer.stream.listen(null);
 
-    sub.onData((Duration duration) {
+    subscriber.onData((Duration duration) {
       currentNumber = duration.toString().substring(2, 7);
       this.onTimerTick(currentNumber, status);
     });
 
-    sub.onDone(() {
-      sub.cancel();
+    subscriber.onDone(() {
+      subscriber.cancel();
       startRound();
     });
   }
 
-  onPressPause(IconData iconData) {
-    if (sub.isPaused) {
-      sub.resume();
+  onPressPause() {
+    if (subscriber.isPaused) {
+      subscriber.resume();
     } else {
-      sub.pause();
+      subscriber.pause();
     }
   }
 
   void startRest() {
     iconStatus = restIcon;
     status = "Descanse";
-    CountDown countDownTimer = CountDown(Duration(seconds: data.rest));
-    sub = countDownTimer.stream.listen(null);
+    CountDown countDownTimer =
+        CountDown(Duration(seconds: data.rest), everyTick: 1);
+    subscriber = countDownTimer.stream.listen(null);
 
-    sub.onData((Duration duration) {
-      checkRest(duration.inSeconds);
+    subscriber.onData((Duration duration) {
       currentNumber = duration.toString().substring(2, 7);
       this.onTimerTick(currentNumber, status);
+      checkRest(duration.inSeconds);
     });
 
-    sub.onDone(() {
-      sub.cancel();
+    subscriber.onDone(() {
+      subscriber.cancel();
       startRound();
     });
   }
 
   startRound() {
-    player.play(startBell);
     iconStatus = boxIcon;
     round += 1;
     status = "Lute!";
-    CountDown countDownTimer = CountDown(Duration(seconds: data.duration));
-    sub = countDownTimer.stream.listen(null);
+    CountDown countDownTimer =
+        CountDown(Duration(seconds: data.duration), everyTick: 1);
+    subscriber = countDownTimer.stream.listen(null);
 
-    sub.onData((Duration duration) {
-      currentNumber = duration.toString().substring(2, 7);
+    subscriber.onData((Duration duration) {
       checkRound(duration.inSeconds);
+      currentNumber = duration.toString().substring(2, 7);
       this.onTimerTick(currentNumber, status);
     });
 
-    sub.onDone(() {
+    subscriber.onDone(() {
+      subscriber.cancel();
       if (round > 0 && round < data.rounds) {
-        player.play(startBell);
         startRest();
       } else {
         status = "Fim!";
-        this.onTimerTick(currentNumber, status);
-        sub.cancel();
-        player.play(endBell);
+        iconStatus = endIcon;
       }
+      this.onTimerTick(currentNumber, status);
     });
   }
 
   checkRest(int time) {
-    if (time == data.restWarning) {
-      player.play(whistle);
+    if (duplicate != time) {
+      duplicate = time;
+      if (time == data.restWarning) {
+        playWhistle();
+      }
     }
   }
 
   checkRound(int time) {
-    if (time == data.roundWarning) {
-      player.play(whistle);
+    if (duplicate != time) {
+      duplicate = time;
+      if (time == data.roundWarning) {
+        playWhistle();
+      } else if (time == 0) {
+        if (round > 0 && round < data.rounds) {
+          playStartBell();
+        } else {
+          playEndBell();
+        }
+      } else if (time == data.duration - 1) {
+        playStartBell();
+      }
     }
+  }
+
+  playStartBell() {
+    return Future.delayed(Duration(milliseconds: 5), () {
+      player.play(startBell);
+    });
+  }
+
+  playWhistle() {
+    return Future.delayed(Duration(milliseconds: 5), () {
+      player.play(whistle);
+    });
+  }
+
+  playEndBell() {
+    return Future.delayed(Duration(milliseconds: 5), () {
+      player.play(endBell);
+    });
   }
 
   void onTimerTick(String currentNumber, String status) {
@@ -162,6 +198,7 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
 
   @override
   Widget build(BuildContext context) {
+    var totalRounds = data.rounds;
     return new WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -183,7 +220,7 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
                       Padding(
                         padding: EdgeInsets.only(top: 30),
                         child: Text(
-                          "Round: " + (round).toString(),
+                          "Round: $round / $totalRounds",
                           style: TextStyle(
                               fontSize: 25.0, fontWeight: FontWeight.bold),
                         ),
@@ -227,7 +264,7 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
                                         ? Icons.pause
                                         : Icons.play_arrow;
 
-                                    onPressPause(icon);
+                                    onPressPause();
                                   });
                                 },
                                 child: Icon(icon),
@@ -243,6 +280,7 @@ class CountdownTimerPageState extends State<CountdownTimerPage> {
                                   } else {
                                     SystemNavigator.pop();
                                   }
+                                  subscriber.cancel();
                                 },
                                 child: Icon(Icons.refresh),
                               ),
@@ -267,20 +305,28 @@ class SetupTimerPageState extends State<SetupTimerPage> {
   final secController = TextEditingController();
   final restMinController = TextEditingController();
   final restSecController = TextEditingController();
-  final delayMinController = TextEditingController();
-  final delaySecController = TextEditingController();
+  final delayController = TextEditingController();
   final roundController = TextEditingController();
   final roundWarningController = TextEditingController();
   final restWarningController = TextEditingController();
-  String min = "3";
-  String sec = "00";
-  String restMin = "1";
-  String restSec = "00";
-  String delayMin = "0";
-  String delaySec = "10";
+
+//  String min = "3";
+//  String sec = "00";
+//  String restMin = "1";
+//  String restSec = "00";
+//  int delay = 10;
+//  int restWarning = 10;
+//  int roundWarning = 30;
+
+  String min = "0";
+  String sec = "10";
+  String restMin = "0";
+  String restSec = "10";
+  int delay = 10;
+  int restWarning = 5;
+  int roundWarning = 5;
   int rounds = 6;
-  int restWarning = 10;
-  int roundWarning = 30;
+
   var data = Data();
 
   int calcRound() {
@@ -289,10 +335,6 @@ class SetupTimerPageState extends State<SetupTimerPage> {
 
   int calcRest() {
     return int.parse(restMin) * 60 + int.parse(restSec);
-  }
-
-  int calcDelay() {
-    return int.parse(delayMin) * 60 + int.parse(delaySec);
   }
 
   incDuration() {
@@ -316,14 +358,14 @@ class SetupTimerPageState extends State<SetupTimerPage> {
   }
 
   incDelay() {
-    delayMin = (int.parse(delayMin) + 1).toString();
-    delayMinController.text = delayMin.toString();
+    delay = delay + 1;
+    delayController.text = delay.toString();
   }
 
   decDelay() {
-    if (int.parse(delayMin) > 0) {
-      delayMin = (int.parse(delayMin) - 1).toString();
-      delayMinController.text = delayMin.toString();
+    if (delay > 0) {
+      delay = delay - 1;
+      delayController.text = delay.toString();
     }
   }
 
@@ -363,8 +405,7 @@ class SetupTimerPageState extends State<SetupTimerPage> {
     secController.text = sec.toString();
     restMinController.text = restMin.toString();
     restSecController.text = restSec.toString();
-    delayMinController.text = delayMin.toString();
-    delaySecController.text = delaySec.toString();
+    delayController.text = delay.toString();
     roundController.text = rounds.toString();
     roundWarningController.text = roundWarning.toString();
     restWarningController.text = restWarning.toString();
@@ -573,7 +614,7 @@ class SetupTimerPageState extends State<SetupTimerPage> {
                   Padding(
                     padding: EdgeInsets.only(top: marginTopTimers),
                     child: Center(
-                      child: Text("Preparação (mm:ss)"),
+                      child: Text("Preparação (ss)"),
                     ),
                   ),
                   Row(
@@ -581,7 +622,7 @@ class SetupTimerPageState extends State<SetupTimerPage> {
                     children: <Widget>[
                       Flexible(
                         child: Padding(
-                            padding: EdgeInsets.only(right: 10),
+                            padding: EdgeInsets.only(right: 35),
                             child: IconButton(
                                 icon: Icon(Icons.indeterminate_check_box),
                                 onPressed: () {
@@ -589,48 +630,29 @@ class SetupTimerPageState extends State<SetupTimerPage> {
                                 })),
                       ),
                       Flexible(
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          controller: delayMinController,
-                          decoration:
-                              InputDecoration(counter: SizedBox.shrink()),
-                          style: TextStyle(color: textColor),
-                          keyboardType: TextInputType.number,
-                          maxLength: 2,
-                          inputFormatters: [
-                            WhitelistingTextInputFormatter.digitsOnly
-                          ],
-                          onChanged: (text) {
-                            delayMin = text;
-                          },
-                        ),
-                      ),
-                      Flexible(
-                          child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        child: Text(":"),
-                      )),
-                      Flexible(
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          controller: delaySecController,
-                          decoration:
-                              InputDecoration(counter: SizedBox.shrink()),
-                          style: TextStyle(color: textColor),
-                          keyboardType: TextInputType.number,
-                          maxLength: 2,
-                          inputFormatters: [
-                            WhitelistingTextInputFormatter.digitsOnly
-                          ],
-                          onChanged: (text) {
-                            delaySec = text;
-                          },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            controller: delayController,
+                            decoration: InputDecoration(
+                              counter: SizedBox.shrink(),
+                            ),
+                            style: TextStyle(color: textColor),
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            inputFormatters: [
+                              WhitelistingTextInputFormatter.digitsOnly
+                            ],
+                            onChanged: (text) {
+                              restWarning = int.parse(text);
+                            },
+                          ),
                         ),
                       ),
                       Flexible(
                         child: Padding(
-                            padding: EdgeInsets.only(left: 10),
+                            padding: EdgeInsets.only(left: 35),
                             child: IconButton(
                                 icon: Icon(Icons.add_box),
                                 onPressed: () {
@@ -673,7 +695,7 @@ class SetupTimerPageState extends State<SetupTimerPage> {
                               WhitelistingTextInputFormatter.digitsOnly
                             ],
                             onChanged: (text) {
-                              restWarning = int.parse(text);
+                              roundWarning = int.parse(text);
                             },
                           ),
                         ),
@@ -763,7 +785,7 @@ class SetupTimerPageState extends State<SetupTimerPage> {
         duration: calcRound(),
         rest: calcRest(),
         rounds: rounds,
-        delay: calcDelay(),
+        delay: delay,
         restWarning: restWarning,
         roundWarning: roundWarning);
     Navigator.push(
