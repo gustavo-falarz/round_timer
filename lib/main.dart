@@ -52,9 +52,9 @@ class MyApp extends StatelessWidget {
 
 class CountdownTimerPageState extends State<CountdownTimerPage> {
   static AudioCache player = new AudioCache();
-  var startBell = "start.mp3";
-  var endBell = "end.mp3";
-  var whistle = "whistle.mp3";
+  var startBell = "sounds/start.ogg";
+  var endBell = "sounds/end.ogg";
+  var whistle = "sounds/whistle.ogg";
   var subscriber;
 
   int stepInSeconds = 1;
@@ -310,22 +310,23 @@ class SetupTimerPageState extends State<SetupTimerPage> {
   final roundWarningController = TextEditingController();
   final restWarningController = TextEditingController();
 
-//  String min = "3";
-//  String sec = "00";
-//  String restMin = "1";
-//  String restSec = "00";
-//  int delay = 10;
-//  int restWarning = 10;
-//  int roundWarning = 30;
-
-  String min = "0";
-  String sec = "10";
-  String restMin = "0";
-  String restSec = "10";
-  int delay = 10;
-  int restWarning = 5;
-  int roundWarning = 5;
   int rounds = 6;
+
+  String min = "3";
+  String sec = "00";
+  String restMin = "1";
+  String restSec = "00";
+  int delay = 10;
+  int restWarning = 10;
+  int roundWarning = 30;
+
+//  String min = "0";
+//  String sec = "10";
+//  String restMin = "0";
+//  String restSec = "10";
+//  int delay = 10;
+//  int restWarning = 5;
+//  int roundWarning = 5;
 
   var data = Data();
 
@@ -762,7 +763,7 @@ class SetupTimerPageState extends State<SetupTimerPage> {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 20),
+                    padding: EdgeInsets.only(top: 20, bottom: 20),
                     child: FloatingActionButton.extended(
                       onPressed: () {
                         startCountDown(context);

@@ -50,9 +50,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/end.mp3
-    - assets/start.mp3
-    - assets/whistle.mp3
+    - assets/sounds/end.ogg
+    - assets/sounds/start.ogg
+    - assets/sounds/whistle.ogg
     - assets/images/setup.png
     - assets/images/box.png
     - assets/images/rest.png
