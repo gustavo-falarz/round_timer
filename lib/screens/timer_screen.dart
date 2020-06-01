@@ -4,10 +4,10 @@ import 'package:audioplayers/audio_cache.dart';
 import 'package:countdown/countdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:round_timer/localization/localization.dart';
 import 'package:round_timer/model/timer_data.dart';
 
 import '../constants.dart';
-
 
 class TimerScreen extends StatefulWidget {
   final TimerData data;
@@ -15,10 +15,8 @@ class TimerScreen extends StatefulWidget {
   TimerScreen({this.data});
 
   @override
-  TimerScreenState createState() =>
-      new TimerScreenState(data: data);
+  TimerScreenState createState() => new TimerScreenState(data: data);
 }
-
 
 class TimerScreenState extends State<TimerScreen> {
   static AudioCache player = new AudioCache();
@@ -30,16 +28,29 @@ class TimerScreenState extends State<TimerScreen> {
   var iconPause = Icons.pause;
 
   int stepInSeconds = 1;
-  String status = "Prepare-se!";
+  String status = '';
+  String title = '';
   TimerData data;
   String currentNumber = "0";
   var round = 0;
   var iconStatus = setupIcon;
   var duplicate = 1654;
 
-  TimerScreenState({this.data}) {
+  TimerScreenState({this.data});
+
+  @override
+  void initState() {
+    super.initState();
     startDelay();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    status = AppLocalizations.of(context).prepareLabel;
+    title = AppLocalizations.of(context).timerTitle;
+  }
+
 
   Future<bool> _onWillPop() {
     subscriber.cancel();
@@ -49,8 +60,9 @@ class TimerScreenState extends State<TimerScreen> {
   void startDelay() {
     iconStatus = setupIcon;
     round = 0;
+
     CountDown countDownTimer =
-    CountDown(Duration(seconds: data.delay), everyTick: 1);
+        CountDown(Duration(seconds: data.delay), everyTick: 1);
     subscriber = countDownTimer.stream.listen(null);
 
     subscriber.onData((Duration duration) {
@@ -74,9 +86,9 @@ class TimerScreenState extends State<TimerScreen> {
 
   void startRest() {
     iconStatus = restIcon;
-    status = "Descanse";
+    status = AppLocalizations.of(context).restLabel;
     CountDown countDownTimer =
-    CountDown(Duration(seconds: data.rest), everyTick: 1);
+        CountDown(Duration(seconds: data.rest), everyTick: 1);
     subscriber = countDownTimer.stream.listen(null);
 
     subscriber.onData((Duration duration) {
@@ -94,9 +106,9 @@ class TimerScreenState extends State<TimerScreen> {
   startRound() {
     iconStatus = boxIcon;
     round += 1;
-    status = "Lute!";
+    status = AppLocalizations.of(context).fightLabel;
     CountDown countDownTimer =
-    CountDown(Duration(seconds: data.duration), everyTick: 1);
+        CountDown(Duration(seconds: data.duration), everyTick: 1);
     subscriber = countDownTimer.stream.listen(null);
 
     subscriber.onData((Duration duration) {
@@ -110,7 +122,7 @@ class TimerScreenState extends State<TimerScreen> {
       if (round > 0 && round < data.rounds) {
         startRest();
       } else {
-        status = "Fim!";
+        status = AppLocalizations.of(context).endLabel;
         iconStatus = endIcon;
       }
       this.onTimerTick(currentNumber, status);
@@ -175,7 +187,7 @@ class TimerScreenState extends State<TimerScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Round Timer'),
+          title: Text(title),
         ),
         body: Container(
           height: double.infinity,
@@ -192,7 +204,7 @@ class TimerScreenState extends State<TimerScreen> {
                       Padding(
                         padding: EdgeInsets.only(top: 30),
                         child: Text(
-                          "Round: $round / $totalRounds",
+                          '${AppLocalizations.of(context).roundLabel} $round / $totalRounds',
                           style: TextStyle(
                               fontSize: 25.0, fontWeight: FontWeight.bold),
                         ),
@@ -200,7 +212,7 @@ class TimerScreenState extends State<TimerScreen> {
                       Padding(
                         padding: EdgeInsets.only(top: 30),
                         child: Text(
-                          "Tempo: $currentNumber",
+                          '${AppLocalizations.of(context).timeLabel} : $currentNumber',
                           style: TextStyle(
                               fontSize: 50.0, fontWeight: FontWeight.bold),
                         ),

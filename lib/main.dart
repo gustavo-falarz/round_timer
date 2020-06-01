@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:round_timer/screens/setup_screen.dart';
 import 'package:screen/screen.dart';
 
 import 'constants.dart';
+import 'localization/localization.dart';
+import 'localization/localization_delegate.dart';
 
 void main() => runApp(MyApp());
 
@@ -17,7 +20,16 @@ class MyApp extends StatelessWidget {
     Screen.keepOn(true);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Round timer',
+      onGenerateTitle: (BuildContext context) => AppLocalizations.of(context).appName,
+      localizationsDelegates: [
+        const AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('en', ''),
+        const Locale('pt', ''),
+      ],
       theme: ThemeData(
         primaryColor: Colors.red,
         accentColor: Colors.red,

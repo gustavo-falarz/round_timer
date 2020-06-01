@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:round_timer/components/double_field.dart';
+import 'package:round_timer/localization/localization.dart';
 import 'package:round_timer/model/timer_data.dart';
 import 'package:round_timer/screens/timer_screen.dart';
 
@@ -48,6 +49,14 @@ class SetupTimerState extends State<SetupTimerScreen> {
   int delay = 10;
   int restWarning = 10;
   int roundWarning = 30;
+
+  String title= '';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    title = AppLocalizations.of(context).appName;
+  }
 
   int calcRound() {
     return int.parse(roundMin) * 60 + int.parse(roundSec);
@@ -133,7 +142,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Round Timer'),
+        title: Text(title),
       ),
       body: Container(
         height: double.infinity,
@@ -146,7 +155,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
               child: Column(
                 children: <Widget>[
                   SingleField(
-                    label: 'Rounds',
+                    label: AppLocalizations.of(context).roundAmountLabel,
                     onPressDec: () {
                       decRounds();
                     },
@@ -159,7 +168,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
                     controller: roundController,
                   ),
                   DoubleField(
-                    label: 'Duração do round (mm:ss)',
+                    label: AppLocalizations.of(context).roundDurationLabel,
                     onPressInc: () {
                       incDuration();
                     },
@@ -176,7 +185,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
                     secController: secController,
                   ),
                   DoubleField(
-                    label: 'Descanso (mm:ss)',
+                    label: AppLocalizations.of(context).restDurationLabel,
                     onPressInc: () {
                       incRest();
                     },
@@ -193,7 +202,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
                     secController: restSecController,
                   ),
                   SingleField(
-                    label: 'Preparação (ss)',
+                    label: AppLocalizations.of(context).delayDurationLabel,
                     onPressDec: () {
                       decDelay();
                     },
@@ -206,7 +215,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
                     controller: delayController,
                   ),
                   SingleField(
-                    label: 'Aviso final de round (ss)',
+                    label: AppLocalizations.of(context).roundWarningLabel,
                     onPressDec: () {
                       decRoundWarning();
                     },
@@ -219,7 +228,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
                     controller: roundWarningController,
                   ),
                   SingleField(
-                    label: 'Aviso final de descanso (ss)',
+                    label: AppLocalizations.of(context).restWarningLabel,
                     onPressDec: () {
                       decRestWarning();
                     },
@@ -238,7 +247,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
                         startCountDown(context);
                       },
                       icon: Icon(Icons.play_arrow),
-                      label: Text('Começar'),
+                      label: Text(AppLocalizations.of(context).startLabel),
                     ),
                   ),
                 ],
