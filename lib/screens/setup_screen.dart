@@ -32,123 +32,41 @@ class Data {
 }
 
 class SetupTimerState extends State<SetupTimerScreen> {
-  final minController = TextEditingController();
-  final secController = TextEditingController();
-  final restMinController = TextEditingController();
-  final restSecController = TextEditingController();
-  final delayController = TextEditingController();
-  final roundController = TextEditingController();
-  final roundWarningController = TextEditingController();
-  final restWarningController = TextEditingController();
-
   int rounds = 6;
 
-  String roundMin = "3";
-  String roundSec = "00";
-  String restMin = "1";
-  String restSec = "00";
+  int roundMin = 3;
+  int roundSec = 00;
+  int restMin = 1;
+  int restSec = 00;
   int delay = 10;
   int restWarning = 10;
   int roundWarning = 10;
 
-  String title= '';
+  String title = '';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    title = AppLocalizations.of(context)!.appName!;
+    title = AppLocalizations.of(context).appName;
   }
 
   int calcRound() {
-    return int.parse(roundMin) * 60 + int.parse(roundSec);
+    return roundMin * 60 + roundSec;
   }
 
   int calcRest() {
-    return int.parse(restMin) * 60 + int.parse(restSec);
-  }
-
-  incDuration() {
-    // roundMin = (int.parse(roundMin) + 1).toString();
-    // minController.text = roundMin.toString();
-  }
-
-  decDuration() {
-    // if (int.parse(roundMin) > 0) {
-    //   roundMin = (int.parse(roundMin) - 1).toString();
-    // }
-    // minController.text = roundMin.toString();
-  }
-
-  incRest() {
-    // restMin = (int.parse(restMin) + 1).toString();
-    // restMinController.text = restMin.toString();
-  }
-
-  decRest() {
-    // if (int.parse(restMin) > 0) restMin = (int.parse(restMin) - 1).toString();
-    // restMinController.text = restMin.toString();
-  }
-
-  incDelay() {
-    // delay = delay + 1;
-    // delayController.text = delay.toString();
-  }
-
-  decDelay() {
-    // if (delay > 0) {
-    //   delay = delay - 1;
-    //   delayController.text = delay.toString();
-    // }
-  }
-
-  incRounds() {
-    // rounds = rounds + 1;
-    // roundController.text = rounds.toString();
-  }
-
-  decRounds() {
-    // if (rounds > 0) rounds = rounds - 1;
-    // roundController.text = rounds.toString();
-  }
-
-  incRoundWarning() {
-    // roundWarning = roundWarning + 1;
-    // roundWarningController.text = roundWarning.toString();
-  }
-
-  decRoundWarning() {
-    // if (roundWarning > 0) roundWarning = roundWarning - 1;
-    // roundWarningController.text = roundWarning.toString();
-  }
-
-  incRestWarning() {
-    // restWarning = restWarning + 1;
-    // restWarningController.text = restWarning.toString();
-  }
-
-  decRestWarning() {
-    // if (restWarning > 0) restWarning = restWarning - 1;
-    // restWarningController.text = restWarning.toString();
+    return restMin* 60 + restSec;
   }
 
   @override
   Widget build(BuildContext context) {
-    minController.text = roundMin.toString();
-    secController.text = roundSec.toString();
-    restMinController.text = restMin.toString();
-    restSecController.text = restSec.toString();
-    delayController.text = delay.toString();
-    roundController.text = rounds.toString();
-    roundWarningController.text = roundWarning.toString();
-    restWarningController.text = restWarning.toString();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),
       body: Container(
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Color(backGroundColor),
         ),
         child: LayoutBuilder(
@@ -157,99 +75,55 @@ class SetupTimerState extends State<SetupTimerScreen> {
               child: Column(
                 children: <Widget>[
                   SingleField(
-                    label: AppLocalizations.of(context)!.roundAmountLabel!,
-                    onPressDec: () {
-                      decRounds();
-                    },
-                    onPressInc: () {
-                      incRounds();
-                    },
+                    label: AppLocalizations.of(context).roundAmountLabel,
                     onTextChanged: (text) {
                       rounds = int.parse(text);
                     },
-                    controller: roundController,
                   ),
                   DoubleField(
-                    label: AppLocalizations.of(context)!.roundDurationLabel!,
-                    onPressInc: () {
-                      incDuration();
-                    },
-                    onPressDec: () {
-                      decDuration();
-                    },
+                    label: AppLocalizations.of(context).roundDurationLabel,
                     onTextChangedMin: (text) {
-                      roundMin = text;
+                      roundMin = int.parse(text);
                     },
                     onTextChangedSec: (text) {
-                      roundSec = text;
+                      roundSec = int.parse(text);
                     },
-                    minController: minController,
-                    secController: secController,
                   ),
                   DoubleField(
-                    label: AppLocalizations.of(context)!.restDurationLabel!,
-                    onPressInc: () {
-                      incRest();
-                    },
-                    onPressDec: () {
-                      decRest();
-                    },
+                    label: AppLocalizations.of(context).restDurationLabel,
                     onTextChangedMin: (text) {
-                      restMin = text;
+                      restMin = int.parse(text);
                     },
                     onTextChangedSec: (text) {
-                      restSec = text;
+                      restSec = int.parse(text);
                     },
-                    minController: restMinController,
-                    secController: restSecController,
                   ),
                   SingleField(
-                    label: AppLocalizations.of(context)!.delayDurationLabel!,
-                    onPressDec: () {
-                      decDelay();
-                    },
-                    onPressInc: () {
-                      incDelay();
-                    },
+                    label: AppLocalizations.of(context).delayDurationLabel,
                     onTextChanged: (text) {
                       delay = int.parse(text);
                     },
-                    controller: delayController,
                   ),
                   SingleField(
-                    label: AppLocalizations.of(context)!.roundWarningLabel!,
-                    onPressDec: () {
-                      decRoundWarning();
-                    },
-                    onPressInc: () {
-                      incRoundWarning();
-                    },
+                    label: AppLocalizations.of(context).roundWarningLabel,
                     onTextChanged: (text) {
                       roundWarning = int.parse(text);
                     },
-                    controller: roundWarningController,
                   ),
                   SingleField(
-                    label: AppLocalizations.of(context)!.restWarningLabel!,
-                    onPressDec: () {
-                      decRestWarning();
-                    },
-                    onPressInc: () {
-                      decRestWarning();
-                    },
+                    label: AppLocalizations.of(context).restWarningLabel,
                     onTextChanged: (text) {
                       restWarning = int.parse(text);
                     },
-                    controller: restWarningController,
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 20, bottom: 20),
+                    padding: const EdgeInsets.only(top: 20, bottom: 20),
                     child: FloatingActionButton.extended(
                       onPressed: () {
                         startCountDown(context);
                       },
-                      icon: Icon(Icons.play_arrow),
-                      label: Text(AppLocalizations.of(context)!.startLabel!),
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(AppLocalizations.of(context).startLabel),
                     ),
                   ),
                 ],
@@ -272,9 +146,10 @@ class SetupTimerState extends State<SetupTimerScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => TimerScreen(
-                data: data,
-              )),
+        builder: (context) => TimerScreen(
+          data: data,
+        ),
+      ),
     );
   }
 }

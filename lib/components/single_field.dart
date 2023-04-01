@@ -4,19 +4,14 @@ import 'package:flutter/services.dart';
 import '../constants.dart';
 
 class SingleField extends StatelessWidget {
-  final Function onPressInc;
-  final Function onPressDec;
   final Function onTextChanged;
-  final TextEditingController controller;
   final String label;
 
-  const SingleField(
-      {super.key,
-      required this.onPressInc,
-      required this.onPressDec,
-      required this.onTextChanged,
-      required this.controller,
-      required this.label});
+  const SingleField({
+    super.key,
+    required this.onTextChanged,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +40,6 @@ class SingleField extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: TextField(
                   textAlign: TextAlign.center,
-                  controller: controller,
                   decoration: const InputDecoration(
                     counter: SizedBox.shrink(),
                   ),
@@ -73,4 +67,8 @@ class SingleField extends StatelessWidget {
       ],
     );
   }
+
+  onPressDec() {}
+
+  onPressInc() {}
 }

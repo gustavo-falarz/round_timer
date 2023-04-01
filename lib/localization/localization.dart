@@ -5,8 +5,8 @@ class AppLocalizations {
 
   AppLocalizations(this.locale);
 
-  static AppLocalizations? of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
   static final Map<String, Map<String, String>> _localizedValues = {
@@ -46,49 +46,49 @@ class AppLocalizations {
     },
   };
 
-  String? get roundAmountLabel {
-    return _localizedValues[locale.languageCode]!['rounds_label'];
+  String get roundAmountLabel {
+    return _localizedValues[locale.languageCode]!['rounds_label']!;
   }
-  String? get roundDurationLabel {
-    return _localizedValues[locale.languageCode]!['round_duration_label'];
+  String get roundDurationLabel {
+    return _localizedValues[locale.languageCode]!['round_duration_label']!;
   }
-  String? get restDurationLabel {
-    return _localizedValues[locale.languageCode]!['rest_duration_label'];
+  String get restDurationLabel {
+    return _localizedValues[locale.languageCode]!['rest_duration_label']!;
   }
-  String? get delayDurationLabel {
-    return _localizedValues[locale.languageCode]!['delay_duration_label'];
+  String get delayDurationLabel {
+    return _localizedValues[locale.languageCode]!['delay_duration_label']!;
   }
-  String? get roundWarningLabel {
-    return _localizedValues[locale.languageCode]!['round_warning_label'];
+  String get roundWarningLabel {
+    return _localizedValues[locale.languageCode]!['round_warning_label']!;
   }
-  String? get restWarningLabel {
-    return _localizedValues[locale.languageCode]!['rest_warning_label'];
+  String get restWarningLabel {
+    return _localizedValues[locale.languageCode]!['rest_warning_label']!;
   }
-  String? get prepareLabel {
-    return _localizedValues[locale.languageCode]!['prepare_label'];
+  String get prepareLabel {
+    return _localizedValues[locale.languageCode]!['prepare_label']!;
   }
-  String? get restLabel {
-    return _localizedValues[locale.languageCode]!['rest_label'];
+  String get restLabel {
+    return _localizedValues[locale.languageCode]!['rest_label']!;
   }
-  String? get fightLabel {
-    return _localizedValues[locale.languageCode]!['fight_label'];
+  String get fightLabel {
+    return _localizedValues[locale.languageCode]!['fight_label']!;
   }
-  String? get startLabel {
-    return _localizedValues[locale.languageCode]!['start_label'];
+  String get startLabel {
+    return _localizedValues[locale.languageCode]!['start_label']!;
   }
-  String? get timeLabel {
-    return _localizedValues[locale.languageCode]!['time_label'];
+  String get timeLabel {
+    return _localizedValues[locale.languageCode]!['time_label']!;
   }
-  String? get endLabel {
-    return _localizedValues[locale.languageCode]!['end_label'];
+  String get endLabel {
+    return _localizedValues[locale.languageCode]!['end_label']!;
   }
-  String? get roundLabel {
-    return _localizedValues[locale.languageCode]!['round_label'];
+  String get roundLabel {
+    return _localizedValues[locale.languageCode]!['round_label']!;
   }
-  String? get appName {
-    return _localizedValues[locale.languageCode]!['app_name'];
+  String get appName {
+    return _localizedValues[locale.languageCode]!['app_name']!;
   }
-  String? get timerTitle {
-    return _localizedValues[locale.languageCode]!['timer_title'];
+  String get timerTitle {
+    return _localizedValues[locale.languageCode]!['timer_title']!;
   }
 }
