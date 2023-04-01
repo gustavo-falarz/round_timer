@@ -6,15 +6,21 @@ import '../constants.dart';
 class SingleField extends StatelessWidget {
   final Function onTextChanged;
   final String label;
+  final int initialValue;
 
-  const SingleField({
+  SingleField({
     super.key,
-    required this.onTextChanged,
+    required this.onTextChanged(int value),
     required this.label,
+    required this.initialValue,
   });
+
+  final _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    _controller.text = initialValue.toString();
+
     return Column(
       children: <Widget>[
         Padding(
@@ -29,9 +35,11 @@ class SingleField extends StatelessWidget {
             Flexible(
               child: Padding(
                 padding: const EdgeInsets.only(right: 35),
-                child: IconButton(
-                  icon: const Icon(Icons.indeterminate_check_box),
-                  onPressed: onPressDec(),
+                child: GestureDetector(
+                  onTap: onPressDec,
+                  child: const Icon(
+                    Icons.indeterminate_check_box,
+                  ),
                 ),
               ),
             ),
@@ -39,6 +47,7 @@ class SingleField extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: TextField(
+                  controller: _controller,
                   textAlign: TextAlign.center,
                   decoration: const InputDecoration(
                     counter: SizedBox.shrink(),
@@ -48,7 +57,9 @@ class SingleField extends StatelessWidget {
                   maxLength: 2,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: (text) {
-                    onTextChanged(text);
+                    if (text.isNotEmpty) {
+                      onTextChanged(int.parse(text));
+                    }
                   },
                 ),
               ),
@@ -56,9 +67,9 @@ class SingleField extends StatelessWidget {
             Flexible(
               child: Padding(
                 padding: const EdgeInsets.only(left: 35),
-                child: IconButton(
-                  icon: const Icon(Icons.add_box),
-                  onPressed: onPressInc(),
+                child: GestureDetector(
+                  onTap: onPressInc,
+                  child: const Icon(Icons.add_box),
                 ),
               ),
             ),
@@ -68,7 +79,15 @@ class SingleField extends StatelessWidget {
     );
   }
 
-  onPressDec() {}
+  onPressDec() {
+    var value = int.parse(_controller.text);
+    value = value - 1;
+    _controller.text = value.toString();
+  }
 
-  onPressInc() {}
+  onPressInc() {
+    var value = int.parse(_controller.text);
+    value = value + 1;
+    _controller.text = value.toString();
+  }
 }

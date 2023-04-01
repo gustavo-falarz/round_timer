@@ -7,16 +7,26 @@ class DoubleField extends StatelessWidget {
   final Function onTextChangedMin;
   final Function onTextChangedSec;
   final String label;
+  final int initialValueMin;
+  final int initialValueSec;
 
-  const DoubleField({
+  DoubleField({
     super.key,
     required this.label,
-    required this.onTextChangedMin,
-    required this.onTextChangedSec,
+    required this.onTextChangedMin(int value),
+    required this.onTextChangedSec(int value),
+    required this.initialValueMin,
+    required this.initialValueSec,
   });
+
+  final _controllerMin = TextEditingController();
+  final _controllerSec = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    _controllerMin.text = initialValueMin.toString();
+    _controllerSec.text = initialValueSec.toString();
+
     return Column(
       children: <Widget>[
         Padding(
@@ -31,14 +41,17 @@ class DoubleField extends StatelessWidget {
             Flexible(
               child: Padding(
                 padding: const EdgeInsets.only(right: 10),
-                child: IconButton(
-                  icon: const Icon(Icons.indeterminate_check_box),
-                  onPressed: onPressInc(),
+                child: GestureDetector(
+                  child: const Icon(Icons.indeterminate_check_box),
+                  onTap: () {
+                    onPressInc();
+                  },
                 ),
               ),
             ),
             Flexible(
               child: TextField(
+                controller: _controllerMin,
                 textAlign: TextAlign.center,
                 decoration: const InputDecoration(counter: SizedBox.shrink()),
                 style: const TextStyle(color: textColor),
@@ -46,7 +59,9 @@ class DoubleField extends StatelessWidget {
                 maxLength: 2,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (text) {
-                  onTextChangedMin(text);
+                  if (text.isNotEmpty) {
+                    onTextChangedMin(text);
+                  }
                 },
               ),
             ),
@@ -58,6 +73,7 @@ class DoubleField extends StatelessWidget {
             ),
             Flexible(
               child: TextField(
+                controller: _controllerSec,
                 textAlign: TextAlign.center,
                 decoration: const InputDecoration(counter: SizedBox.shrink()),
                 style: const TextStyle(color: textColor),
@@ -65,16 +81,22 @@ class DoubleField extends StatelessWidget {
                 maxLength: 2,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (text) {
-                  onTextChangedSec(text);
+                  if (text.isNotEmpty) {
+                    onTextChangedSec(text);
+                  }
                 },
               ),
             ),
             Flexible(
               child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: IconButton(
-                      icon: const Icon(Icons.add_box),
-                      onPressed: onPressInc())),
+                padding: const EdgeInsets.only(left: 10),
+                child: GestureDetector(
+                  child: const Icon(Icons.add_box),
+                  onTap: () {
+                    onPressInc();
+                  },
+                ),
+              ),
             ),
           ],
         ),
@@ -82,5 +104,15 @@ class DoubleField extends StatelessWidget {
     );
   }
 
-  onPressInc() {}
+  onPressDec() {
+    var value = int.parse(_controllerMin.text);
+    value = value - 1;
+    _controllerMin.text = value.toString();
+  }
+
+  onPressInc() {
+    var value = int.parse(_controllerMin.text);
+    value = value + 1;
+    _controllerMin.text = value.toString();
+  }
 }
