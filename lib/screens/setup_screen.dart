@@ -60,84 +60,85 @@ class SetupTimerState extends State<SetupTimerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Container(
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          color: Color(backGroundColor),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
         ),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints viewportConstraints) {
-            return SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  SingleField(
-                    initialValue: rounds,
-                    label: AppLocalizations.of(context).roundAmountLabel,
-                    onTextChanged: (value) {
-                      rounds = value;
-                    },
-                  ),
-                  DoubleField(
-                    initialValueMin: roundMin,
-                    initialValueSec: roundSec,
-                    label: AppLocalizations.of(context).roundDurationLabel,
-                    onTextChangedMin: (value) {
-                      roundMin = value;
-                    },
-                    onTextChangedSec: (value) {
-                      roundSec = value;
-                    },
-                  ),
-                  DoubleField(
-                    initialValueMin: restMin,
-                    initialValueSec: restSec,
-                    label: AppLocalizations.of(context).restDurationLabel,
-                    onTextChangedMin: (value) {
-                      restMin = value;
-                    },
-                    onTextChangedSec: (value) {
-                      restSec = value;
-                    },
-                  ),
-                  SingleField(
-                    initialValue: delay,
-                    label: AppLocalizations.of(context).delayDurationLabel,
-                    onTextChanged: (value) {
-                      delay = value;
-                    },
-                  ),
-                  SingleField(
-                    initialValue: roundWarning,
-                    label: AppLocalizations.of(context).roundWarningLabel,
-                    onTextChanged: (value) {
-                      roundWarning = value;
-                    },
-                  ),
-                  SingleField(
-                    initialValue: restWarning,
-                    label: AppLocalizations.of(context).restWarningLabel,
-                    onTextChanged: (value) {
-                      restWarning = value;
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20, bottom: 20),
-                    child: FloatingActionButton.extended(
-                      onPressed: () {
-                        startCountDown(context);
+        body: Container(
+          decoration: const BoxDecoration(
+            color: Color(backGroundColor),
+          ),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints viewportConstraints) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    SingleField(
+                      initialValue: rounds,
+                      label: AppLocalizations.of(context).roundAmountLabel,
+                      onTextChanged: (value) {
+                        rounds = value;
                       },
-                      icon: const Icon(Icons.play_arrow),
-                      label: Text(AppLocalizations.of(context).startLabel),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    DoubleField(
+                      initialValueMin: roundMin,
+                      initialValueSec: roundSec,
+                      label: AppLocalizations.of(context).roundDurationLabel,
+                      onTextChangedMin: (value) {
+                        roundMin = value;
+                      },
+                      onTextChangedSec: (value) {
+                        roundSec = value;
+                      },
+                    ),
+                    DoubleField(
+                      initialValueMin: restMin,
+                      initialValueSec: restSec,
+                      label: AppLocalizations.of(context).restDurationLabel,
+                      onTextChangedMin: (value) {
+                        restMin = value;
+                      },
+                      onTextChangedSec: (value) {
+                        restSec = value;
+                      },
+                    ),
+                    SingleField(
+                      initialValue: delay,
+                      label: AppLocalizations.of(context).delayDurationLabel,
+                      onTextChanged: (value) {
+                        delay = value;
+                      },
+                    ),
+                    SingleField(
+                      initialValue: roundWarning,
+                      label: AppLocalizations.of(context).roundWarningLabel,
+                      onTextChanged: (value) {
+                        roundWarning = value;
+                      },
+                    ),
+                    SingleField(
+                      initialValue: restWarning,
+                      label: AppLocalizations.of(context).restWarningLabel,
+                      onTextChanged: (value) {
+                        restWarning = value;
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20, bottom: 20),
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          startCountDown(context);
+                        },
+                        icon: const Icon(Icons.play_arrow),
+                        label: Text(AppLocalizations.of(context).startLabel),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -4,7 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:keep_screen_on/keep_screen_on.dart';
 import 'package:round_timer/screens/setup_screen.dart';
 
-import 'constants.dart';
+import 'color_schemes.g.dart';
 import 'localization/localization.dart';
 import 'localization/localization_delegate.dart';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       onGenerateTitle: (BuildContext context) =>
-          AppLocalizations.of(context)!.appName!,
+          AppLocalizations.of(context).appName,
       localizationsDelegates: const [
         AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
@@ -33,34 +33,8 @@ class MyApp extends StatelessWidget {
         Locale('en', ''),
         Locale('pt', ''),
       ],
-      theme: ThemeData(
-        buttonTheme: ButtonThemeData(buttonColor: Colors.red, ),
-        primaryColor: Colors.red,
-        appBarTheme: const AppBarTheme(color: Colors.red),
-        inputDecorationTheme: const InputDecorationTheme(
-          enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: textColor),
-          ),
-        ),
-        backgroundColor: const Color(backGroundColor),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(color: textColor),
-          displayMedium: TextStyle(color: textColor),
-          displaySmall: TextStyle(color: textColor),
-          headlineMedium: TextStyle(color: textColor),
-          headlineSmall: TextStyle(color: textColor),
-          titleLarge: TextStyle(color: textColor),
-          titleMedium: TextStyle(color: textColor),
-          titleSmall: TextStyle(color: textColor),
-          bodyLarge: TextStyle(color: textColor),
-          bodyMedium: TextStyle(color: textColor),
-          bodySmall: TextStyle(color: textColor),
-          labelLarge: TextStyle(color: textColor),
-        ),
-      ),
+      theme: ThemeData(useMaterial3: false, colorScheme: lightColorScheme),
+      darkTheme: ThemeData(useMaterial3: false, colorScheme: darkColorScheme),
       home: const SetupTimerScreen(),
     );
   }

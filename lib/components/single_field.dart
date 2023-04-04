@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:round_timer/components/icons.dart';
 
 import '../constants.dart';
 
@@ -26,7 +27,10 @@ class SingleField extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: marginTopTimers),
           child: Center(
-            child: Text(label),
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
         Row(
@@ -35,11 +39,9 @@ class SingleField extends StatelessWidget {
             Flexible(
               child: Padding(
                 padding: const EdgeInsets.only(right: 35),
-                child: GestureDetector(
-                  onTap: onPressDec,
-                  child: const Icon(
-                    Icons.indeterminate_check_box,
-                  ),
+                child: IconButton(
+                  onPressed: onPressDec,
+                  icon: const DecIcon(),
                 ),
               ),
             ),
@@ -67,9 +69,9 @@ class SingleField extends StatelessWidget {
             Flexible(
               child: Padding(
                 padding: const EdgeInsets.only(left: 35),
-                child: GestureDetector(
-                  onTap: onPressInc,
-                  child: const Icon(Icons.add_box),
+                child: IconButton(
+                  onPressed: onPressInc,
+                  icon: const IncIcon(),
                 ),
               ),
             ),

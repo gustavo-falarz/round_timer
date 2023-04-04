@@ -45,7 +45,6 @@ class TimerScreenState extends State<TimerScreen> {
     startDelay();
   }
 
-
   @override
   void dispose() {
     subscriber?.cancel();
@@ -55,8 +54,8 @@ class TimerScreenState extends State<TimerScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    status = AppLocalizations.of(context)!.prepareLabel!;
-    title = AppLocalizations.of(context)!.timerTitle!;
+    status = AppLocalizations.of(context).prepareLabel;
+    title = AppLocalizations.of(context).timerTitle;
   }
 
   Future<bool> _onWillPop() {
@@ -96,7 +95,7 @@ class TimerScreenState extends State<TimerScreen> {
 
   void startRest() {
     iconStatus = restIcon;
-    status = AppLocalizations.of(context)!.restLabel!;
+    status = AppLocalizations.of(context).restLabel;
 
     CountdownTimer countDownTimer = CountdownTimer(
       Duration(seconds: data.rest + 2),
@@ -120,7 +119,7 @@ class TimerScreenState extends State<TimerScreen> {
   startRound() {
     iconStatus = boxIcon;
     round += 1;
-    status = AppLocalizations.of(context)!.fightLabel!;
+    status = AppLocalizations.of(context).fightLabel;
 
     CountdownTimer countDownTimer = CountdownTimer(
       Duration(seconds: data.duration + 2),
@@ -140,7 +139,7 @@ class TimerScreenState extends State<TimerScreen> {
       if (round > 0 && round < data.rounds) {
         startRest();
       } else {
-        status = AppLocalizations.of(context)!.endLabel!;
+        status = AppLocalizations.of(context).endLabel;
         iconStatus = endIcon;
       }
       onTimerTick(currentNumber, status);
@@ -222,17 +221,23 @@ class TimerScreenState extends State<TimerScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 30),
                         child: Text(
-                          '${AppLocalizations.of(context)!.roundLabel!} $round / $totalRounds',
+                          '${AppLocalizations.of(context).roundLabel} $round / $totalRounds',
                           style: const TextStyle(
-                              fontSize: 25.0, fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 30),
                         child: Text(
-                          '${AppLocalizations.of(context)!.timeLabel!} $currentNumber',
+                          '${AppLocalizations.of(context).timeLabel} $currentNumber',
                           style: const TextStyle(
-                              fontSize: 50.0, fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 50.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Padding(
@@ -240,7 +245,10 @@ class TimerScreenState extends State<TimerScreen> {
                         child: Text(
                           status,
                           style: const TextStyle(
-                              fontSize: 40.0, fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 40.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       Padding(
