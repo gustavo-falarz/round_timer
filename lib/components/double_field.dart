@@ -48,7 +48,7 @@ class DoubleField extends StatelessWidget {
                 child: IconButton(
                   icon: const DecIcon(),
                   onPressed: () {
-                    onPressInc();
+                    onPressDec();
                   },
                 ),
               ),
@@ -64,7 +64,7 @@ class DoubleField extends StatelessWidget {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (text) {
                   if (text.isNotEmpty) {
-                    onTextChangedMin(text);
+                    onTextChangedMin(int.parse(text));
                   }
                 },
               ),
@@ -89,7 +89,7 @@ class DoubleField extends StatelessWidget {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (text) {
                   if (text.isNotEmpty) {
-                    onTextChangedSec(text);
+                    onTextChangedSec(int.parse(text));
                   }
                 },
               ),
@@ -115,11 +115,13 @@ class DoubleField extends StatelessWidget {
     var value = int.parse(_controllerMin.text);
     value = value - 1;
     _controllerMin.text = value.toString();
+    onTextChangedMin(value);
   }
 
   onPressInc() {
     var value = int.parse(_controllerMin.text);
     value = value + 1;
     _controllerMin.text = value.toString();
+    onTextChangedMin(value);
   }
 }

@@ -85,11 +85,13 @@ class SingleField extends StatelessWidget {
     var value = int.parse(_controller.text);
     value = value - 1;
     _controller.text = value.toString();
+    onTextChanged(value);
   }
 
   onPressInc() {
     var value = int.parse(_controller.text);
     value = value + 1;
     _controller.text = value.toString();
+    onTextChanged(value);
   }
 }
