@@ -1,6 +1,6 @@
 class TimerData {
   int rounds;
-  int duration;
+  int rounDuration;
   int rest;
   int delay;
   int roundWarning;
@@ -8,7 +8,7 @@ class TimerData {
 
   TimerData(
       {required this.rounds,
-      required this.duration,
+      required this.rounDuration,
       required this.rest,
       required this.delay,
       required this.roundWarning,

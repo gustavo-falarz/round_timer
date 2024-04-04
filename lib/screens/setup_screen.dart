@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:round_timer/components/double_field.dart';
 import 'package:round_timer/localization/localization.dart';
+import 'package:round_timer/model/interval_model.dart';
 import 'package:round_timer/model/timer_data.dart';
 import 'package:round_timer/screens/timer_screen.dart';
 
@@ -144,17 +145,30 @@ class SetupTimerState extends State<SetupTimerScreen> {
 
   void startCountDown(BuildContext context) {
     var data = TimerData(
-        duration: calcRound(),
+        rounDuration: calcRound(),
         rest: calcRest(),
         rounds: rounds,
         delay: delay,
         restWarning: restWarning,
         roundWarning: roundWarning);
+
+    List<IntervalModel> intervals = [];
+    if(delay > 0){
+      intervals.add(IntervalModel(duration: delay, type: IntervalType.delay));
+    }
+    for (var i = 0; i < rounds; i++) {
+      intervals.add(IntervalModel(duration: data.rounDuration, type: IntervalType.round));
+      if(i != rounds) {
+        intervals.add(
+            IntervalModel(duration: data.rest, type: IntervalType.rest));
+      }
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => TimerScreen(
-          data: data,
+          intervals: intervals,
         ),
       ),
     );
