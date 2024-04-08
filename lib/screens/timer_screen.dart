@@ -1,13 +1,9 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
-import 'package:round_timer/localization/localization.dart';
 
-import '../constants.dart';
 import '../model/interval_model.dart';
 
 class TimerScreen extends StatefulWidget {
@@ -20,51 +16,37 @@ class TimerScreen extends StatefulWidget {
 }
 
 class TimerScreenState extends State<TimerScreen> {
-  final startBellPlayer = AudioPlayer();
+  final audioPlayer = AudioPlayer();
   var endBell = "sounds/end.ogg";
   var startBell = "sounds/start.ogg";
   var whistle = "sounds/whistle.ogg";
-  late CountdownTimerController controller;
-
-  var index = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    controller =
-        CountdownTimerController(endTime: widget.intervals[index].duration);
-  }
+  CountDownController controller = CountDownController();
+  int duration = 0;
+  var index = -1;
 
   playStartBell() {
-    return Future.delayed(const Duration(milliseconds: 5), () {
-      startBellPlayer.play(AssetSource(startBell));
-    });
+    audioPlayer.play(AssetSource(startBell));
   }
 
   playWhistle() {
-    return Future.delayed(const Duration(milliseconds: 5), () {
-      startBellPlayer.play(AssetSource(whistle));
-    });
+    audioPlayer.play(AssetSource(whistle));
   }
 
   playEndBell() {
-    return Future.delayed(const Duration(milliseconds: 5), () {
-      startBellPlayer.play(AssetSource(endBell));
-    });
-  }
-
-  void onTimerTick(String currentNumber, String status) {
-    setState(() {
-      currentNumber = currentNumber;
-      status = status;
-    });
+    audioPlayer.play(AssetSource(endBell));
   }
 
   String _getIntervalName() {
-    if (widget.intervals[index].type == IntervalType.rest) {
-      return 'Rest';
-    } else {
-      return 'Round';
+    if (index == -1) {
+      return 'Prepare';
+    }
+    switch (widget.intervals[index].type) {
+      case IntervalType.rest:
+        return 'Rest';
+      case IntervalType.round:
+        return 'Round';
+      case IntervalType.delay:
+        return 'Prepare';
     }
   }
 
@@ -72,88 +54,118 @@ class TimerScreenState extends State<TimerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('title'),
+        title: Text('Round timer'),
       ),
-      body: Container(
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          color: Color(backGroundColor),
-        ),
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints viewportConstraints) {
-            return SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30),
-                      child: Text(
-                        '${AppLocalizations.of(context).roundLabel} $index / ${widget.intervals.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                        padding: const EdgeInsets.only(top: 30),
-                        child: CountdownTimer(
-                          controller: controller,
-                        )),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 30),
-                      child: Text(
-                        _getIntervalName(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 40.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 40),
-                      child: Image.asset(
-                        'iconStatus',
-                        width: 100,
-                        height: 100,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 50),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(right: 40),
-                            child: FloatingActionButton(
-                                heroTag: null, onPressed: () {}),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 40),
-                            child: FloatingActionButton(
-                              heroTag: null,
-                              onPressed: () {
-                                if (Navigator.canPop(context)) {
-                                  Navigator.pop(context);
-                                } else {
-                                  SystemNavigator.pop();
-                                }
-                              },
-                              child: const Icon(Icons.refresh),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircularCountDownTimer(
+            duration: duration,
+            initialDuration: duration,
+            controller: controller,
+            width: MediaQuery.of(context).size.width / 1.7,
+            height: MediaQuery.of(context).size.height / 1.7,
+            ringColor: Theme.of(context).colorScheme.secondary,
+            ringGradient: null,
+            fillColor: Theme.of(context).colorScheme.secondaryContainer,
+            fillGradient: null,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundGradient: null,
+            strokeWidth: 20.0,
+            strokeCap: StrokeCap.round,
+            textStyle: const TextStyle(
+                fontSize: 38.0,
+                color: Colors.white,
+                fontWeight: FontWeight.bold),
+            isReverse: true,
+            isReverseAnimation: false,
+            isTimerTextShown: true,
+            autoStart: false,
+            onComplete: () {
+              index++;
+              duration = widget.intervals[index].duration;
+              controller.restart(duration: duration);
+            },
+            onChange: (String timeStamp) {
+              debugPrint('Countdown Changed $timeStamp');
+            },
+            timeFormatterFunction: (defaultFormatterFunction, duration) {
+              _playSound(duration);
+              return Function.apply(_defaultFormatterFunction, [duration]);
+            },
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  if (controller.isPaused) {
+                    controller.resume();
+                  } else {
+                    controller.start();
+                  }
+                },
+                child: const Icon(Icons.play_arrow),
               ),
-            );
-          },
-        ),
+              ElevatedButton(
+                onPressed: () {
+                  if (!controller.isPaused) {
+                    controller.pause();
+                  }
+                },
+                child: const Icon(Icons.pause),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  controller.reset();
+                  Navigator.pop(context);
+                },
+                child: const Icon(Icons.refresh),
+              ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  void _playSound(Duration currentDuration) {
+    if (index == -1) {
+      return;
+    }
+
+    IntervalModel interval = widget.intervals[index];
+    if (interval.type != IntervalType.delay) {
+      if (currentDuration.inSeconds == interval.duration) {
+        playStartBell();
+      }
+      if (currentDuration.inSeconds == 0) {
+        playStartBell();
+      }
+      if (interval.warning != 0 &&
+          interval.warning == currentDuration.inSeconds) {
+        playWhistle();
+      }
+    }
+  }
+
+  String _defaultFormatterFunction(Duration duration) {
+    String twoDigits(int n) {
+      if (n >= 10) return '$n';
+      return '0$n';
+    }
+
+    final twoDigitMinutes =
+        twoDigits(duration.inMinutes.remainder(Duration.minutesPerHour));
+    final twoDigitSeconds =
+        twoDigits(duration.inSeconds.remainder(Duration.secondsPerMinute));
+    return '$twoDigitMinutes:$twoDigitSeconds\n${_getIntervalName()}';
+  }
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    super.dispose();
   }
 }

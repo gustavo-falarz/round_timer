@@ -22,6 +22,7 @@ dependencies:
   timer_count_down: ^2.2.0
   quiver: ^3.2.1
   flutter_countdown_timer: ^4.1.0
+  circular_countdown_timer: ^0.2.3
 
 dev_dependencies:
   flutter_test:

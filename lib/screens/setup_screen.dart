@@ -153,14 +153,25 @@ class SetupTimerState extends State<SetupTimerScreen> {
         roundWarning: roundWarning);
 
     List<IntervalModel> intervals = [];
-    if(delay > 0){
-      intervals.add(IntervalModel(duration: delay, type: IntervalType.delay));
+    if (delay > 0) {
+      intervals.add(IntervalModel(
+        duration: delay,
+        type: IntervalType.delay,
+        warning: data.roundWarning,
+      ));
     }
     for (var i = 0; i < rounds; i++) {
-      intervals.add(IntervalModel(duration: data.rounDuration, type: IntervalType.round));
-      if(i != rounds) {
-        intervals.add(
-            IntervalModel(duration: data.rest, type: IntervalType.rest));
+      intervals.add(IntervalModel(
+        duration: data.rounDuration,
+        type: IntervalType.round,
+        warning: data.roundWarning,
+      ));
+      if (i != rounds) {
+        intervals.add(IntervalModel(
+          duration: data.rest,
+          type: IntervalType.rest,
+          warning: data.restWarning,
+        ));
       }
     }
 
