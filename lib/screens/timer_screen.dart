@@ -23,6 +23,7 @@ class TimerScreenState extends State<TimerScreen> {
   CountDownController controller = CountDownController();
   int duration = 0;
   var index = -1;
+  int round = 1;
 
   playStartBell() {
     audioPlayer.play(AssetSource(startBell));
@@ -58,14 +59,34 @@ class TimerScreenState extends State<TimerScreen> {
       ),
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const SizedBox(
+            height: 30.0,
+          ),
+          Text(
+            '$round / ${_getRounds()}',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onBackground,
+              fontSize: 30.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            _getIntervalName(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onBackground,
+              fontSize: 30.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           CircularCountDownTimer(
             duration: duration,
             initialDuration: duration,
             controller: controller,
             width: MediaQuery.of(context).size.width / 1.7,
-            height: MediaQuery.of(context).size.height / 1.7,
+            height: 350.0,
             ringColor: Theme.of(context).colorScheme.secondary,
             ringGradient: null,
             fillColor: Theme.of(context).colorScheme.secondaryContainer,
@@ -83,6 +104,7 @@ class TimerScreenState extends State<TimerScreen> {
             isTimerTextShown: true,
             autoStart: false,
             onComplete: () {
+              _updateRound();
               index++;
               duration = widget.intervals[index].duration;
               controller.restart(duration: duration);
@@ -130,6 +152,17 @@ class TimerScreenState extends State<TimerScreen> {
     );
   }
 
+  void _updateRound() {
+    if (index == -1) {
+      return;
+    }
+    if (widget.intervals[index].type == IntervalType.round) {
+      setState(() {
+        round++;
+      });
+    }
+  }
+
   void _playSound(Duration currentDuration) {
     if (index == -1) {
       return;
@@ -160,12 +193,20 @@ class TimerScreenState extends State<TimerScreen> {
         twoDigits(duration.inMinutes.remainder(Duration.minutesPerHour));
     final twoDigitSeconds =
         twoDigits(duration.inSeconds.remainder(Duration.secondsPerMinute));
-    return '$twoDigitMinutes:$twoDigitSeconds\n${_getIntervalName()}';
+    return '$twoDigitMinutes:$twoDigitSeconds';
   }
 
   @override
   void dispose() {
     audioPlayer.dispose();
     super.dispose();
+  }
+
+  String _getRounds() {
+    List<IntervalModel> rounds = widget.intervals
+        .where((element) => element.type == IntervalType.round)
+        .toList();
+
+    return rounds.length.toString();
   }
 }
