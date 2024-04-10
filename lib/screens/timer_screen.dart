@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
@@ -23,18 +21,28 @@ class TimerScreenState extends State<TimerScreen> {
   CountDownController controller = CountDownController();
   int duration = 0;
   var index = -1;
-  int round = 1;
+  int round = 0;
+  var intervalName = '';
 
-  playStartBell() {
-    audioPlayer.play(AssetSource(startBell));
+  Future<void> playStartBell() async {
+    Future.microtask(() {
+      audioPlayer.play(AssetSource(startBell));
+    });
+    // await audioPlayer.play(AssetSource(startBell));
   }
 
-  playWhistle() {
-    audioPlayer.play(AssetSource(whistle));
+  Future<void> playWhistle() async {
+    Future.microtask(() {
+      audioPlayer.play(AssetSource(whistle));
+    });
+    // await audioPlayer.play(AssetSource(whistle));
   }
 
-  playEndBell() {
-    audioPlayer.play(AssetSource(endBell));
+  Future<void> playEndBell() async {
+    Future.microtask(() {
+      audioPlayer.play(AssetSource(endBell));
+    });
+    // await audioPlayer.play(AssetSource(endBell));
   }
 
   String _getIntervalName() {
@@ -74,7 +82,7 @@ class TimerScreenState extends State<TimerScreen> {
             ),
           ),
           Text(
-            _getIntervalName(),
+            intervalName,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onBackground,
               fontSize: 30.0,
@@ -96,16 +104,16 @@ class TimerScreenState extends State<TimerScreen> {
             strokeWidth: 20.0,
             strokeCap: StrokeCap.round,
             textStyle: const TextStyle(
-                fontSize: 38.0,
+                fontSize: 40.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold),
             isReverse: true,
-            isReverseAnimation: false,
+            isReverseAnimation: true,
             isTimerTextShown: true,
             autoStart: false,
             onComplete: () {
               _updateRound();
-              index++;
+              _updateIntervalName();
               duration = widget.intervals[index].duration;
               controller.restart(duration: duration);
             },
@@ -153,14 +161,26 @@ class TimerScreenState extends State<TimerScreen> {
   }
 
   void _updateRound() {
+    index++;
     if (index == -1) {
       return;
-    }
-    if (widget.intervals[index].type == IntervalType.round) {
+    } else if (index == widget.intervals.length) {
+      setState(() {
+        intervalName = 'Done';
+        index = 0;
+        controller.pause();
+      });
+    } else if (widget.intervals[index].type == IntervalType.round) {
       setState(() {
         round++;
       });
     }
+  }
+
+  void _updateIntervalName() {
+    setState(() {
+      intervalName = _getIntervalName();
+    });
   }
 
   void _playSound(Duration currentDuration) {
@@ -198,6 +218,7 @@ class TimerScreenState extends State<TimerScreen> {
 
   @override
   void dispose() {
+    audioPlayer.release();
     audioPlayer.dispose();
     super.dispose();
   }

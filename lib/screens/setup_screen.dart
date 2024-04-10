@@ -174,6 +174,7 @@ class SetupTimerState extends State<SetupTimerScreen> {
         ));
       }
     }
+    intervals.remove(intervals.last);
 
     Navigator.push(
       context,
